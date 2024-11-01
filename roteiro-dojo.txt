@@ -1,0 +1,159 @@
+1 - acessar o swegger que vamos utilizar para o teste
+
+https://serverest.dev/
+
+2 - Criar um workspace para nosso Dojo
+
+Automação de execução de teste
+
+3 - Fazer a importação dos endpoints do serverest
+
+D:\Px\Estudos\Dojo - Automação de execução de teste de API
+
+4 - Escopo das variáveis
+
+Listar Produtos: {{baseUrl}}/produtos
+local, Collection, Enviroment, Global e Vault(cofre)
+
+5 - Cadastrar Produtos
+###########
+{
+  "nome": "Monitor LG 29 Polegadas",
+  "preco": "600",
+  "descricao": "Monitor LG 29 polegadas Full HD",
+  "quantidade": "10"
+}
+###########
+
+Endpoint com autenticação
+
+{{baseUrl}}/login
+{
+  "email": "fulano@qa.com",
+  "password": "teste"
+}
+
+{{apiKey}} -> 
+{{access_token}} ->
+
+6 - Automação do login
+
+###########
+pm.sendRequest({
+    url: pm.collectionVariables.get("baseUrl") + "/login",
+    method: 'POST',
+    body: {
+        mode: 'raw',
+        options: {
+			raw: {
+				language: "json"
+			},            
+        },
+		raw: JSON.stringify({
+			email: "fulano@qa.com",
+			password: "teste"
+		})
+    }
+},
+    (err, res) => {
+        console.log(res.json().authorization);
+		
+        let  auth = res.json().authorization.split(" ")
+        console.log(auth);
+        console.log(auth[1]);
+		
+//		  pm.variables.set("{{access_token}}", auth[1]);        		
+        pm.collectionVariables.set("{{access_token}}", auth[1]);
+//        pm.environment.set("access_token", auth[1]);
+//        pm.globals.set("{{access_token}}", auth[1]);        
+
+});
+###########
+______________________________________
+
+Runner
+
+1 - Criar uma pasta "Cadastrar produto Runner"
+Copiar o cadastro de produto
+###########
+{
+  "nome": "{{nome}}",
+  "preco": "{{preco}}",
+  "descricao": "{{descricao}}",
+  "quantidade": "{{quantidade}}"
+}
+###########
+
+2 - Merge dos resultados
+
+###########
+let responses = pm.collectionVariables.has('collectionResponses') ? JSON.parse(pm.collectionVariables.get('collectionResponses')) : [];
+
+var responseBody = pm.response.json();
+var produto = {
+	id: responseBody._id
+}
+
+responses.push(produto);
+strJson = JSON.stringify(responses)
+
+pm.collectionVariables.set('collectionResponses', strJson)
+console.log(strJson);
+#########
+
+Criar um excel com o resultado:
+https://www.convertcsv.com/json-to-csv.htm
+
+
+3 - Assertions
+
+###########
+pm.test("Status code is 201", () => {
+  pm.response.to.have.status(201);
+});
+
+pm.test("Retornou um ID", () => {
+  pm.expect(responseBody._id).to.not.eql(null);
+});
+###########
+
+
+4 - Desafio
+
+Excluir os produtos que foram inseridos no mesmo runner
+
+5 - Compartilhar export do Postman
+
+6 - Link de referência
+https://learning.postman.com/docs/tests-and-scripts/tests-and-scripts/
+
+
+______________________________________
+
+POUPEX
+###########
+pm.sendRequest({
+    url: "https://" + pm.environment.get("url_token") + "/f5-oauth2/v1/token",
+    method: 'POST',
+    header: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: {
+        mode: 'urlencoded',
+        urlencoded: [
+            {key: 'grant_type', value: "client_credentials"},
+            {key: 'client_id', value: pm.environment.get("client_id")},
+            {key: 'client_secret', value: pm.environment.get("client_secret")},
+        ]
+    }
+},
+    (err, res) => {
+		console.log(res.json().access_token);  
+//		  pm.variables.set("{{access_token}}", , res.json().access_token);
+		pm.collectionVariables.set("{{access_token}}", res.json().access_token);
+        pm.environment.set("access_token",res.json().access_token);		
+		pm.globals.set("{{access_token}}", res.json().access_token);        
+
+});
+###########
