@@ -122,11 +122,9 @@ pm.test("Retornou um ID", () => {
 
 Excluir os produtos que foram inseridos no mesmo runner
 
-5 - Compartilhar export do Postman
-
-6 - Link de referência
+5 - Link de referência
+https://github.com/ronaldormelo/dojo-teste-de-api-postman
 https://learning.postman.com/docs/tests-and-scripts/tests-and-scripts/
-
 
 ______________________________________
 
