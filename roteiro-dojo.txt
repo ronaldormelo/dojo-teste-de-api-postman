@@ -1,21 +1,33 @@
-1 - acessar o swegger que vamos utilizar para o teste
+Dojô - Automação de execução de teste de API com Postman - Básico
+
+Vamos cobrir alguns recursos de automação no Postman, incluindo:
+1 - Importação de collection a partir do Swagger
+2 - Escopo e Criação de variáveis de ambiente, collection e globais
+3 - Autenticação automática através do Pré-request
+4 - Execução em massa e uso do CSV para alimentar variáveis pelo Runner
+5 - Uso do Post-request para salvar retorno em variáveis
+6 - Usar assertions para validar as execuções
+
+_____________________________________
+
+1 - Importação de collection a partir do Swagger
+1.1 - acessar o swegger que vamos utilizar para o teste
 
 https://serverest.dev/
 
-2 - Criar um workspace para nosso Dojo
+1.2 - Criar um workspace para nosso Dojo
 
 Automação de execução de teste
 
-3 - Fazer a importação dos endpoints do serverest
+1.3 - Fazer a importação dos endpoints do serverest
 
-D:\Px\Estudos\Dojo - Automação de execução de teste de API
-
-4 - Escopo das variáveis
+2 - Escopo e Criação de variáveis de ambiente, collection e globais
+2.1 - Escopo das variáveis
 
 Listar Produtos: {{baseUrl}}/produtos
 local, Collection, Enviroment, Global e Vault(cofre)
 
-5 - Cadastrar Produtos
+2.2 - Cadastrar Produtos
 ###########
 {
   "nome": "Monitor LG 29 Polegadas",
@@ -36,8 +48,8 @@ Endpoint com autenticação
 {{apiKey}} -> 
 {{access_token}} ->
 
-6 - Automação do login
-
+3 - Autenticação automática através do Pré-request
+3.1 - Automação do login - serverest.dev
 ###########
 pm.sendRequest({
     url: pm.collectionVariables.get("baseUrl") + "/login",
@@ -69,66 +81,8 @@ pm.sendRequest({
 
 });
 ###########
-______________________________________
 
-Runner
-
-1 - Criar uma pasta "Cadastrar produto Runner"
-Copiar o cadastro de produto
-###########
-{
-  "nome": "{{nome}}",
-  "preco": "{{preco}}",
-  "descricao": "{{descricao}}",
-  "quantidade": "{{quantidade}}"
-}
-###########
-
-2 - Merge dos resultados
-
-###########
-let responses = pm.collectionVariables.has('collectionResponses') ? JSON.parse(pm.collectionVariables.get('collectionResponses')) : [];
-
-var responseBody = pm.response.json();
-var produto = {
-	id: responseBody._id
-}
-
-responses.push(produto);
-strJson = JSON.stringify(responses)
-
-pm.collectionVariables.set('collectionResponses', strJson)
-console.log(strJson);
-#########
-
-Criar um excel com o resultado:
-https://www.convertcsv.com/json-to-csv.htm
-
-
-3 - Assertions
-
-###########
-pm.test("Status code is 201", () => {
-  pm.response.to.have.status(201);
-});
-
-pm.test("Retornou um ID", () => {
-  pm.expect(responseBody._id).to.not.eql(null);
-});
-###########
-
-
-4 - Desafio
-
-Excluir os produtos que foram inseridos no mesmo runner
-
-5 - Link de referência
-https://github.com/ronaldormelo/dojo-teste-de-api-postman
-https://learning.postman.com/docs/tests-and-scripts/tests-and-scripts/
-
-______________________________________
-
-POUPEX
+3.2 - Automação do token - POUPEX
 ###########
 pm.sendRequest({
     url: "https://" + pm.environment.get("url_token") + "/f5-oauth2/v1/token",
@@ -147,11 +101,60 @@ pm.sendRequest({
     }
 },
     (err, res) => {
-		console.log(res.json().access_token);  
+		console.log(res.json().access_token);
 //		  pm.variables.set("{{access_token}}", , res.json().access_token);
 		pm.collectionVariables.set("{{access_token}}", res.json().access_token);
-        pm.environment.set("access_token",res.json().access_token);		
-		pm.globals.set("{{access_token}}", res.json().access_token);        
+        pm.environment.set("access_token",res.json().access_token);
+		pm.globals.set("{{access_token}}", res.json().access_token);
 
 });
 ###########
+
+4 - Execução em massa e uso do CSV para alimentar variáveis pelo Runner
+4.1 - Criar uma pasta "Cadastrar produto Runner"
+
+Copiar o cadastro de produto
+###########
+{
+  "nome": "{{nome}}",
+  "preco": "{{preco}}",
+  "descricao": "{{descricao}}",
+  "quantidade": "{{quantidade}}"
+}
+###########
+
+4.2 - Criar o arquivo CSV que vai alimentar as variáveis do Runner
+
+5 - Uso do Post-request para salvar retorno em variáveis
+###########
+let responses = pm.collectionVariables.has('collectionResponses') ? JSON.parse(pm.collectionVariables.get('collectionResponses')) : [];
+
+var responseBody = pm.response.json();
+var produto = {
+	id: responseBody._id
+}
+
+responses.push(produto);
+strJson = JSON.stringify(responses)
+
+pm.collectionVariables.set('collectionResponses', strJson)
+console.log(strJson);
+#########
+
+6 - Usar assertions para validar as execuções
+###########
+pm.test("Status code is 201", () => {
+  pm.response.to.have.status(201);
+});
+
+pm.test("Retornou um ID", () => {
+  pm.expect(responseBody._id).to.not.eql(null);
+});
+###########
+
+7 - Desafio
+7.1 - Excluir os produtos que foram inseridos no mesmo runner
+
+8 - Referência
+https://github.com/ronaldormelo/dojo-teste-de-api-postman
+https://learning.postman.com/docs/tests-and-scripts/tests-and-scripts/
